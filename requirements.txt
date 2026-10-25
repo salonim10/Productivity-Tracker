@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+pandas
+scikit-learn
+psutil
+pygetwindow
+pywin32
+beautifulsoup4
+uiautomation
+
