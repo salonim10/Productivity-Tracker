@@ -7,3 +7,4 @@ pygetwindow; sys_platform == "win32"
 pywin32; sys_platform == "win32"
 beautifulsoup4
 uiautomation; sys_platform == "win32"
+selenium
