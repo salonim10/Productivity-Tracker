@@ -1,0 +1,21 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: productivity-tracker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: productivity-tracker
+  template:
+    metadata:
+      labels:
+        app: productivity-tracker
+    spec:
+      containers:
+        - name: productivity-tracker
+          image: salonimuley/productivity-tracker:1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
