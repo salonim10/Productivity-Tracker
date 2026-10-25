@@ -144,3 +144,100 @@ python app.py --no-browser     # Start server without auto-opening browser
 
 - **[CODEBASE_GUIDE.md](file:///c:/Users/piyus/Downloads/Productivity-Tracker-main/Productivity-Tracker/CODEBASE_GUIDE.md)**: Exhaustive file-by-file breakdown, sequence diagrams, call graphs, database schemas, and WebSocket protocol contracts.
 - **[TECH_STACK_AND_GUIDE.md](file:///c:/Users/piyus/Downloads/Productivity-Tracker-main/Productivity-Tracker/TECH_STACK_AND_GUIDE.md)**: Detailed evaluation of libraries, architectural patterns, and toolkits for building future AI desktop apps.
+
+- # Productivity Tracker — CI/CD Pipeline Implementation
+
+## 1. Project Overview
+
+**Project Name:** Productivity Tracker (FocusTracker)
+
+**GitHub Repository:** https://github.com/salonim10/Productivity-Tracker
+
+This project is a Python-based productivity tracking application with a web dashboard for viewing productivity statistics, activity logs, daily tasks, and classification keywords.
+
+The objective of this assignment is to implement a CI/CD pipeline that automates code validation, Docker image creation, image publishing, and Kubernetes deployment.
+
+## 2. Technologies Used
+
+- Python
+- Git and GitHub
+- Jenkins
+- AWS EC2
+- Docker
+- Docker Hub
+- Kubernetes
+- Minikube
+- Linux and Ubuntu
+
+## 3. CI/CD Pipeline Stages
+
+The Jenkins pipeline consists of the following stages:
+
+1. **Checkout:** Retrieves the latest source code from the GitHub `upload-main` branch.
+2. **Python Validation:** Installs project dependencies in a virtual environment, checks Python syntax, and executes the available unit tests.
+3. **Build Docker Image:** Builds a Docker image using the Dockerfile and assigns build-specific and `latest` tags.
+4. **Push to Docker Hub:** Authenticates using Jenkins-stored credentials and pushes the image to the Docker Hub repository `salonimuley/productivity-tracker`.
+5. **Deploy to Kubernetes:** Applies the Kubernetes manifests, updates the Deployment to use the current build image, waits for rollout completion, and checks the deployment, pods, and services.
+
+## 4. Jenkins Setup on AWS EC2
+
+An Ubuntu EC2 instance was created in AWS and configured with Java, Jenkins, Docker, kubectl, and Minikube.
+
+Jenkins was accessed through its web interface. A pipeline job named `Productivity-Tracker-CI-CD` was configured to retrieve the Jenkinsfile from the GitHub repository.
+
+Docker Hub credentials were stored in Jenkins Credentials with the ID `dockerhub-creds`. These credentials were used during the image-publishing stage rather than being hard-coded in the pipeline.
+
+A Kubernetes configuration was made available to Jenkins so that the pipeline could deploy the application to Minikube.
+
+## 5. Docker Image Publishing
+
+The Dockerfile uses the `python:3.11-slim` base image, installs the dependencies listed in `requirements-docker.txt`, copies the project files, and configures the application to run on port 8000.
+
+The Jenkins pipeline builds and publishes the image to:
+
+`salonimuley/productivity-tracker`
+
+Build-specific tags and the `latest` tag are used to identify the published images.
+
+## 6. Kubernetes Deployment
+
+The `k8s/` directory contains two manifest files:
+
+- `deployment.yaml`: Defines the Productivity Tracker Deployment and its application container.
+- `service.yaml`: Defines a NodePort Service named `productivity-tracker-service` that routes traffic to port 8000 of the application container.
+
+Minikube was used as the Kubernetes environment. The Deployment was configured with one replica.
+
+The application was tested using Kubernetes port forwarding and an HTTP request to `http://127.0.0.1:8000`.
+
+The application returned `HTTP/1.1 200 OK`, confirming that the deployed web application responded successfully.
+
+## 7. Second Pipeline Execution
+
+To demonstrate an updated deployment, the dashboard heading in `static/index.html` was changed to:
+
+`Dashboard Overview - CI/CD Update 2`
+
+The updated source code was committed and pushed to the `upload-main` branch on GitHub.
+
+Jenkins was executed again. The second pipeline completed successfully, published a new Docker image, and deployed it to Kubernetes.
+
+The rollout status reported successful deployment, the application pod was running, and the updated heading was verified in the HTTP response.
+
+This demonstrated the workflow from source-code modification through image publishing and Kubernetes redeployment.
+
+## 8. Verification Results
+
+The following checks were completed:
+
+- Jenkins pipeline completed successfully.
+- Docker images were published to Docker Hub.
+- Kubernetes Deployment reported one available replica.
+- The application pod reached the Running state.
+- Kubernetes rollout completed successfully.
+- An HTTP request returned `200 OK`.
+- The updated dashboard heading was found in the deployed application's response.
+
+## 9. Conclusion
+
+This assignment demonstrates a CI/CD workflow using GitHub, Jenkins, Docker, Docker Hub, AWS EC2, and Kubernetes with Minikube. The pipeline automates source-code validation, image creation, image publishing, and deployment, and the second execution demonstrates redeployment after a source-code change.
