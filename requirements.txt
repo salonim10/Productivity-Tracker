@@ -3,8 +3,7 @@ uvicorn[standard]
 pandas
 scikit-learn
 psutil
-pygetwindow
-pywin32
+pygetwindow; sys_platform == "win32"
+pywin32; sys_platform == "win32"
 beautifulsoup4
-uiautomation
-
+uiautomation; sys_platform == "win32"
