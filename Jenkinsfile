@@ -17,9 +17,15 @@ pipeline {
         stage('Python Validation') {
             steps {
                 sh '''
-                    python3 -m compileall -q .
+                    python3 -m venv .venv
+
+                    .venv/bin/pip install --upgrade pip
+                    .venv/bin/pip install -r requirements.txt
+
+                    .venv/bin/python -m compileall -q .
+
                     if [ -d tests ]; then
-                        python3 -m unittest discover -s tests -v
+                        .venv/bin/python -m unittest discover -s tests -v
                     fi
                 '''
             }
@@ -27,7 +33,11 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t ${IMAGE_REPO}:${BUILD_NUMBER} .'
+                sh '''
+                    docker build \
+                        -t ${IMAGE_REPO}:${BUILD_NUMBER} \
+                        -t ${IMAGE_REPO}:latest .
+                '''
             }
         }
 
@@ -42,9 +52,14 @@ pipeline {
                 ]) {
                     sh '''
                         set +x
+
                         echo "$DOCKERHUB_PASS" | docker login \
-                            -u "$DOCKERHUB_USER" --password-stdin
+                            -u "$DOCKERHUB_USER" \
+                            --password-stdin
+
                         docker push ${IMAGE_REPO}:${BUILD_NUMBER}
+                        docker push ${IMAGE_REPO}:latest
+
                         docker logout
                     '''
                 }
@@ -55,11 +70,18 @@ pipeline {
             steps {
                 sh '''
                     kubectl apply -f k8s/
-                    kubectl set image deployment/productivity-tracker \
+
+                    kubectl set image \
+                        deployment/productivity-tracker \
                         productivity-tracker=${IMAGE_REPO}:${BUILD_NUMBER}
+
                     kubectl rollout status \
-                        deployment/productivity-tracker --timeout=180s
-                    kubectl get pods,services
+                        deployment/productivity-tracker \
+                        --timeout=180s
+
+                    kubectl get deployments
+                    kubectl get pods
+                    kubectl get services
                 '''
             }
         }
@@ -69,11 +91,13 @@ pipeline {
         always {
             sh 'docker logout || true'
         }
+
         success {
             echo 'CI/CD pipeline completed successfully!'
         }
+
         failure {
-            echo 'Pipeline failed. Check the stage logs.'
+            echo 'Pipeline failed. Check the Console Output for details.'
         }
     }
 }
